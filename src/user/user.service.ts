@@ -43,8 +43,7 @@ export class UserService {
     }
 
     async findOneById(id: number): Promise<User> {
-        const user = await this.userRepo.findOneBy({id});
-        console.log(user);
+        const user = await this.userRepo.findOneByOrFail({id});
         return user;
     }
 
@@ -66,4 +65,5 @@ export class UserService {
 
         return this.userRepo.save(user);
     }
+
 }

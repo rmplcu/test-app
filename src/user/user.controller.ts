@@ -1,5 +1,7 @@
 import { BadRequestException, Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Todos } from '../todos/entities/todo.entity';
+import { TodosService } from '../todos/todos.service';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { PasswordDto } from './dto/psw.dto';
 import { User } from './entities/user.entity';
@@ -60,5 +62,21 @@ export class UserController {
     @Post('new')
     createUser(@Body() body : CreateUserDTO) : Promise<User> {
         return this.userService.createUser(body);
+    }
+
+
+    @ApiNotFoundResponse({description: 'Negative user id'})
+    @ApiNotFoundResponse({description: 'User not found'})
+    @ApiOkResponse()
+    @Get('todos/:id')
+    async getTodosByUserID(@Param('id') id: number): Promise<Todos[]> {
+        if (id < 0) throw new BadRequestException();
+        try {
+            const user = await this.userService.findOneById(id);
+            console.log(user.todos)
+            return user.todos;
+        } catch (_) {
+            throw new NotFoundException();
+        }
     }
 }
