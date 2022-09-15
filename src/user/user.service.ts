@@ -13,11 +13,11 @@ export class UserService {
 
     async createUser(createUserdto: CreateUserDto) : Promise<UserDocument> {
         createUserdto.password = await bcrypt.hash(createUserdto.password, 10);
-        const newUser = new this.userModel(createUserdto);
+        const newUser = new this.userModel({...createUserdto, refresh_token: null});
         return newUser.save();
     }
 
-    findOneByName(name: string): Promise<User> {
+    findOneByName(name: string): Promise<UserDocument> {
         return this.userModel.findOne({name}).exec();
     }
 
@@ -26,6 +26,10 @@ export class UserService {
     }
 
     async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument> {
-        return this.userModel.findByIdAndUpdate(id, updateUserDto, {new: true}).exec();
+        return this.userModel.findByIdAndUpdate(id, {"refresh_token": updateUserDto.refreshToken}, {new: true}).exec();
     }
+
+    async findById(id : string) : Promise<UserDocument> {
+        return this.userModel.findById(id).exec();
+    } 
 }

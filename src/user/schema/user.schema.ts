@@ -18,6 +18,9 @@ export class User {
     @ApiProperty()
     @Prop({required: true})
     password: string;
+
+    @Prop({required: false})
+    refresh_token: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

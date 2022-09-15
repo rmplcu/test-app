@@ -1,7 +1,6 @@
 import { Controller, Get, Param, NotFoundException, UseGuards } from '@nestjs/common';
 import { ApiUnauthorizedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiParam } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { CreateUserDto } from './dto/create-user.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { User } from './schema/user.schema';
 import { UserService } from './user.service';
 
@@ -25,7 +24,7 @@ export class UserController {
 
     @ApiOkResponse({type: User, isArray: true, description: 'Get all users'})
     @ApiUnauthorizedResponse({description: 'User not logged in'})
-    @UseGuards(JwtAuthGuard)
+    //@UseGuards(JwtAuthGuard)
     @Get()
     async getAll() : Promise<User[]> {
         return this.userService.findAll();
