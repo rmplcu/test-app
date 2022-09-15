@@ -18,6 +18,8 @@ async function bootstrap() {
 
   //Swagger config
   const config = new DocumentBuilder()
+    .addBearerAuth()
+    .addSecurityRequirements('bearer')
     .setTitle('Nestjs test app')
     .setDescription('My first nestjs app')
     .setVersion('1.0').build();

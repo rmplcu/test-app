@@ -8,9 +8,10 @@ import {
   NotFoundException,
   Query,
   UseGuards,
-  Request
+  Request,
+  ParseIntPipe
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CitiesService } from './cities.service';
 import { CreateCityDto } from './dto/create-city.dto';
@@ -22,7 +23,7 @@ export class CitiesController {
   constructor(private readonly citiesService: CitiesService) {}
 
   @UseGuards(JwtAuthGuard)
-  @ApiUnauthorizedResponse()
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiCreatedResponse({type: City, description: 'Creates and returns the new city'})
   @Post()
   create(@Body() createCityDto: CreateCityDto): Promise<City> {
@@ -41,34 +42,42 @@ export class CitiesController {
     return city;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type:City, isArray: true, description: 'Get all the countries available'})
   @Get('countries') 
   findAllCounties() : Promise<string[]> {
     return this.citiesService.getAllCountries()
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiNotFoundResponse()
   @ApiOkResponse({type: City, isArray: true})
-  @ApiParam({name: 'country', description: 'The country where to search for cities'})
+  @ApiQuery({name: 'country', description: 'The country where to search for cities'})
   @Get('country')
-  async findByCountry(@Query('country') country : string): Promise<City[]> {
-    const cities = await this.citiesService.findByCountry(country);
+  async findByCountry(@Query() query : {country : string}): Promise<City[]> {
+    const cities = await this.citiesService.findByCountry(query.country);
     if (!cities || cities.length === 0) throw new NotFoundException();
 
     return cities;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true})
   @ApiNotFoundResponse()
-  @ApiParam({name: 'continent', description: 'The continent where to search for cities'})
+  @ApiQuery({name: 'continent', description: 'The continent where to search for cities'})
   @Get('continent')
-  async findByContinent(@Query('continent') continent: string) : Promise<City[]> {
-    const cities = await this.citiesService.findByContinent(continent);
+  async findByContinent(@Query() query : {continent: string}) : Promise<City[]> {
+    const cities = await this.citiesService.findByContinent(query.continent);
     if (!cities || cities.length === 0) throw new NotFoundException();
 
     return cities;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City})
   @ApiNotFoundResponse()
   @ApiParam({name: 'name', description: 'The name of the city to find'})
@@ -80,6 +89,8 @@ export class CitiesController {
     return city;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City})
   @ApiNotFoundResponse({description: 'City not found'})
   @ApiParam({name: 'name', description: 'The name of the city to delete'})
@@ -91,23 +102,27 @@ export class CitiesController {
     return city;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true, description: 'Get all cities with at most {value} million people'})
-  @ApiNotFoundResponse()
+  @ApiNotFoundResponse({description: 'Cities not found'})
   @Get('population/min')
-  @ApiParam({name: 'value', description: 'Minimum million people'})
-  async getCitiesByMinPopulation(@Query('value') value: number) : Promise<City[]> {
-    const cities = await this.citiesService.findByFunction(city => city.population >= value);
+  @ApiQuery({name: 'value', description: 'Minimum million people', type: Number})
+  async getCitiesByMinPopulation(@Query() query: {value: number}) : Promise<City[]> {
+    const cities = await this.citiesService.findByMinPopulation(query.value);
     if (!cities || cities.length === 0) throw new NotFoundException();
 
     return cities;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true, description: 'Get all cities with at most {value} million people'})
-  @ApiNotFoundResponse()
-  @ApiParam({name: 'value', description: 'Maximum million people'})
+  @ApiNotFoundResponse({description: 'Cities not found'})
+  @ApiQuery({name: 'value', description: 'Maximum million people'})
   @Get('population/max')
-  async getCitiesByMaxPopulation(@Query('value') value: number): Promise<City[]> {
-    const cities = await this.citiesService.findByFunction(city => city.population <= value);
+  async getCitiesByMaxPopulation(@Query() query : {value: number}): Promise<City[]> {
+    const cities = await this.citiesService.findByMaxPopulation(query.value);
     if (!cities || cities.length === 0) throw new NotFoundException();
 
     return cities;

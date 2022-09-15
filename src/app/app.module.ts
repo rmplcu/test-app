@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import {ConfigModule} from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Movies } from '../movies/entities/movie.entity';
 import { MoviesModule } from '../movies/movies.module';

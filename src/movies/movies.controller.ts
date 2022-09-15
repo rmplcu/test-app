@@ -1,5 +1,6 @@
-import { BadRequestException, Body, Controller, Get, NotFoundException, Post, Query } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { ApiBody, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { MovieDto } from './dto/create-movie.dto';
 import { Movies } from './entities/movie.entity';
 import { MoviesService } from './movies.service';
@@ -9,12 +10,16 @@ import { MoviesService } from './movies.service';
 export class MoviesController {
     constructor(private movieService: MoviesService) {}
 
-    @ApiOkResponse()
+    @ApiOkResponse({description: 'Get all movies'})
     @Get()
     findAll(): Promise<Movies[]> {
+        console.log(process.env.PORT)
         return this.movieService.findAll();
     }
 
+    @ApiCreatedResponse({description: 'New movie created'})
+    @UseGuards(JwtAuthGuard)
+    @ApiUnauthorizedResponse({description: 'User not logged in'})
     @ApiBody({type: MovieDto})
     @Post('new')
     insertMovie(@Body() body: MovieDto): Promise<Movies> {

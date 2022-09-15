@@ -34,9 +34,16 @@ export class CitiesService {
     return this.cityModel.find({continent}).exec();
   }
 
-  async findByFunction(fn: (target: City) => boolean): Promise<City[]> {
-    const cities = (await this.cityModel.find().exec()).filter(fn);
+  async findByMaxPopulation(value: number): Promise<City[]> {
+    return this.cityModel.find({
+      population: {$lt: value}
+    }).exec();
+  }
 
+  async findByMinPopulation(value: number): Promise<City[]> {
+    const cities = await this.cityModel.find({
+      population: {$gt: value}
+    })
     return cities;
   }
 

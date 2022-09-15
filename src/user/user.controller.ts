@@ -1,5 +1,6 @@
-import { Controller, Post, Body, Get, Param, NotFoundException } from '@nestjs/common';
-import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, NotFoundException, UseGuards } from '@nestjs/common';
+import { ApiUnauthorizedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiParam } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
 import { UserService } from './user.service';
@@ -8,15 +9,12 @@ import { UserService } from './user.service';
 @Controller('user')
 export class UserController {
     constructor(private readonly userService : UserService) {}
-    /*
-    @ApiCreatedResponse({type: User, description: 'New user created'})
-    @Post()
-    create(@Body() createUserDto: CreateUserDto) : Promise<User> {
-        return this.userService.createUser(createUserDto);
-    }*/
 
+    @ApiParam({name: 'name', description: 'The name of the user'})
+    @ApiUnauthorizedResponse({description: 'User not logged in'})
+    @UseGuards(JwtAuthGuard)
     @ApiOkResponse({type: User, description: 'User found'})
-    @ApiNotFoundResponse({description: 'User not faound'})
+    @ApiNotFoundResponse({description: 'User not found'})
     @Get(':name')
     async findOneByName(@Param('name') name: string): Promise<User> {
         const user = await this.userService.findOneByName(name);
@@ -25,8 +23,13 @@ export class UserController {
         return user;
     }
 
+    @ApiOkResponse({type: User, isArray: true, description: 'Get all users'})
+    @ApiUnauthorizedResponse({description: 'User not logged in'})
+    @UseGuards(JwtAuthGuard)
     @Get()
     async getAll() : Promise<User[]> {
         return this.userService.findAll();
     }
 }
+
+

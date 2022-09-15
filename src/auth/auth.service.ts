@@ -37,32 +37,6 @@ export class AuthService {
         }
 
         const newUser = await this.userService.createUser(createUserDto);
-        const tokens = await this.getTokens(newUser._id, newUser.name);
-        await this.updateRefreshToken(newUser._id, tokens.refreshToken);
-        
-        return tokens;
-    }
-
-    async getTokens(userId: string, username: string) {
-        const accessToken = await this.jwtService.signAsync({
-            sub: userId,
-            username
-        });
-
-        const refreshToken = await this.jwtService.signAsync({
-            sub: userId,
-            username
-        });
-
-        return {accessToken, refreshToken};
-    }
-
-    hashData(data: string): Promise<string> {
-        return crypt.hash(data, 10);
-    }
-
-    async updateRefreshToken(userId: string, refreshToken: string) {
-        const hashRefreshToken = await this.hashData(refreshToken);
-        await this.userService.updateUser(userId, {refreshToken: hashRefreshToken});
+        return this.login(newUser);
     }
 }
