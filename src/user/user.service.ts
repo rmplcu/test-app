@@ -1,69 +1,31 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Relation, Repository } from 'typeorm';
-import { CreateUserDTO } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
-import { PasswordDto } from './dto/psw.dto';
-import * as bcrypt from 'bcrypt'
+import { InjectModel } from '@nestjs/mongoose';
+import * as bcrypt from 'bcrypt';
+import { Model } from 'mongoose';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User, UserDocument } from './schema/user.schema';
 
 @Injectable()
 export class UserService {
-    constructor(@InjectRepository(User) private readonly userRepo: Repository<User>) {}
 
-    findAll(name? : string) : Promise<User[]> {
-        if (name) {
-            return this.userRepo.find({
-                where: {
-                    name
-                }
-            });
-        }
-        
-        return this.userRepo.find();
+    constructor(@InjectModel(User.name) private userModel : Model<User>) {}
+
+    async createUser(createUserdto: CreateUserDto) : Promise<UserDocument> {
+        createUserdto.password = await bcrypt.hash(createUserdto.password, 10);
+        const newUser = new this.userModel(createUserdto);
+        return newUser.save();
     }
 
-    async setPassword(pswDto: PasswordDto): Promise<User> {
-        try {
-            const user = await this.userRepo.findOneByOrFail({id : pswDto.user});
-            user.password = await bcrypt.hash(pswDto.password, await bcrypt.genSalt());
-
-            return this.userRepo.save(user);
-        } catch (err) {
-            throw new NotFoundException();
-        }
+    findOneByName(name: string): Promise<User> {
+        return this.userModel.findOne({name}).exec();
     }
 
-    async comparePsw(pswDto : PasswordDto) : Promise<boolean> {
-        try {
-            const user = await this.userRepo.findOneByOrFail({id : pswDto.user});
-            return await bcrypt.compare(pswDto.password, user.password);
-        } catch (err) { //user not found
-            return false;
-        }
+    async findAll() : Promise<User[]> {
+        return this.userModel.find().exec();
     }
 
-    async findOneById(id: number): Promise<User> {
-        const user = await this.userRepo.findOneByOrFail({id});
-        return user;
+    async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument> {
+        return this.userModel.findByIdAndUpdate(id, updateUserDto, {new: true}).exec();
     }
-
-    async createUser(createUserDto : CreateUserDTO) : Promise<any> {
-        let id : number;
-        const lastUser = await this.userRepo.createQueryBuilder('lastuser').select('MAX(user.id)').from(User, 'user').execute()
-        .then(res => id = res.id)
-        .catch(_ => id = 0);
-        
-        const newUser = this.userRepo.create({id:0, ...createUserDto});
-
-        return this.userRepo.save(newUser);
-    }
-
-    async updateUser(id:number, newName:string, newAge?:number) : Promise<User> {
-        const user = await this.findOneById(id);
-        user.name = newName
-        if (newAge) user.age = newAge;
-
-        return this.userRepo.save(user);
-    }
-
 }

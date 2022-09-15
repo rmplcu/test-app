@@ -3,29 +3,34 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   NotFoundException,
   Query,
+  UseGuards,
+  Request
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CitiesService } from './cities.service';
 import { CreateCityDto } from './dto/create-city.dto';
-import { UpdateCityDto } from './dto/update-city.dto';
 import { City } from './schema/cities.schemas';
 
-@ApiTags('cities')
+@ApiTags('Cities')
 @Controller('cities')
 export class CitiesController {
   constructor(private readonly citiesService: CitiesService) {}
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse()
   @ApiCreatedResponse({type: City, description: 'Creates and returns the new city'})
   @Post()
   create(@Body() createCityDto: CreateCityDto): Promise<City> {
     return this.citiesService.create(createCityDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true, description: 'Get all the cities in the database'})
   @ApiNotFoundResponse({description: 'No city found in the database'})
   @Get()

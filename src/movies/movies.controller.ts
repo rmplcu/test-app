@@ -4,7 +4,7 @@ import { MovieDto } from './dto/create-movie.dto';
 import { Movies } from './entities/movie.entity';
 import { MoviesService } from './movies.service';
 
-@ApiTags('movies')
+@ApiTags('Movies')
 @Controller('movies')
 export class MoviesController {
     constructor(private movieService: MoviesService) {}

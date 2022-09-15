@@ -1,82 +1,32 @@
-import { BadRequestException, Body, Controller, Get, InternalServerErrorException, NotFoundException, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
-import { Todos } from '../todos/entities/todo.entity';
-import { TodosService } from '../todos/todos.service';
-import { CreateUserDTO } from './dto/create-user.dto';
-import { PasswordDto } from './dto/psw.dto';
-import { User } from './entities/user.entity';
+import { Controller, Post, Body, Get, Param, NotFoundException } from '@nestjs/common';
+import { ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './schema/user.schema';
 import { UserService } from './user.service';
 
-@ApiTags('user')
+@ApiTags('User')
 @Controller('user')
 export class UserController {
-    constructor(private userService : UserService) {}
-    
-    @ApiNotFoundResponse()
-    @ApiOkResponse({type: User, isArray: true})
-    @Get('all')
-    getAll() : Promise<User[]> {
-        return this.getAllUsers();
-    }
+    constructor(private readonly userService : UserService) {}
+    /*
+    @ApiCreatedResponse({type: User, description: 'New user created'})
+    @Post()
+    create(@Body() createUserDto: CreateUserDto) : Promise<User> {
+        return this.userService.createUser(createUserDto);
+    }*/
 
-    @ApiNotFoundResponse()
-    @ApiOkResponse({type: User, isArray: true})
-    @Get()
-    async getAllUsers(@Query('name') name?: string) : Promise<User[]> {
-        const users = await this.userService.findAll(name);
-        if (users.length === 0) throw new NotFoundException();
-
-        return users;
-    }
-    
-    @ApiNotFoundResponse()
-    @ApiBadRequestResponse()
-    @ApiOkResponse({type: User})
-    @Get(':id') 
-    async getOneById(@Param('id', ParseIntPipe) id : number) : Promise<User> { //Pipe -> trasforma in Int
-        if (id < 0) throw new BadRequestException();
-        
-        const user = await this.userService.findOneById(id);
+    @ApiOkResponse({type: User, description: 'User found'})
+    @ApiNotFoundResponse({description: 'User not faound'})
+    @Get(':name')
+    async findOneByName(@Param('name') name: string): Promise<User> {
+        const user = await this.userService.findOneByName(name);
         if (!user) throw new NotFoundException();
-        
+
         return user;
     }
 
-    @ApiNotFoundResponse()
-    @ApiOkResponse({type: User})
-    @Post('password')
-    async setPassword(@Body() body: PasswordDto) : Promise<User> {
-        const newPsw = await this.userService.setPassword(body);
-        if (!newPsw) throw new NotFoundException();
-
-        return newPsw;
-    }
-
-    @ApiOkResponse({type: Boolean})
-    @Post('validate-password')
-    comparePsw(@Body() body : PasswordDto): Promise<boolean>{
-        return this.userService.comparePsw(body)
-    }
-
-    @ApiCreatedResponse({type: User})
-    @Post('new')
-    createUser(@Body() body : CreateUserDTO) : Promise<User> {
-        return this.userService.createUser(body);
-    }
-
-
-    @ApiNotFoundResponse({description: 'Negative user id'})
-    @ApiNotFoundResponse({description: 'User not found'})
-    @ApiOkResponse()
-    @Get('todos/:id')
-    async getTodosByUserID(@Param('id') id: number): Promise<Todos[]> {
-        if (id < 0) throw new BadRequestException();
-        try {
-            const user = await this.userService.findOneById(id);
-            console.log(user.todos)
-            return user.todos;
-        } catch (_) {
-            throw new NotFoundException();
-        }
+    @Get()
+    async getAll() : Promise<User[]> {
+        return this.userService.findAll();
     }
 }
