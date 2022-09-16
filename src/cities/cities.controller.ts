@@ -22,7 +22,6 @@ import { City } from './schema/cities.schemas';
 export class CitiesController {
   constructor(private readonly citiesService: CitiesService) {}
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiCreatedResponse({type: City, description: 'Creates and returns the new city'})
   @Post()
@@ -30,7 +29,6 @@ export class CitiesController {
     return this.citiesService.create(createCityDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true, description: 'Get all the cities in the database'})
   @ApiNotFoundResponse({description: 'No city found in the database'})
@@ -42,7 +40,6 @@ export class CitiesController {
     return city;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type:City, isArray: true, description: 'Get all the countries available'})
   @Get('countries') 
@@ -50,7 +47,6 @@ export class CitiesController {
     return this.citiesService.getAllCountries()
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiNotFoundResponse()
   @ApiOkResponse({type: City, isArray: true})
@@ -63,7 +59,6 @@ export class CitiesController {
     return cities;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true})
   @ApiNotFoundResponse()
@@ -76,7 +71,6 @@ export class CitiesController {
     return cities;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City})
   @ApiNotFoundResponse()
@@ -89,7 +83,6 @@ export class CitiesController {
     return city;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City})
   @ApiNotFoundResponse({description: 'City not found'})
@@ -102,7 +95,6 @@ export class CitiesController {
     return city;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true, description: 'Get all cities with at most {value} million people'})
   @ApiNotFoundResponse({description: 'Cities not found'})
@@ -115,7 +107,6 @@ export class CitiesController {
     return cities;
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({description: 'User not logged in'})
   @ApiOkResponse({type: City, isArray: true, description: 'Get all cities with at most {value} million people'})
   @ApiNotFoundResponse({description: 'Cities not found'})

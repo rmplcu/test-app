@@ -7,12 +7,14 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RefreshJwtGuard } from './guards/refresh-jwt-auth.guard';
 import { GetCurrentUserId, GetCurrentUserRefreshToken } from '../commons/decorators/user.decorator';
+import { Public } from '../commons/decorators';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
     constructor(private authService : AuthService) {}
 
+    @Public()
     @ApiForbiddenResponse({description: 'User not found'})
     @ApiCreatedResponse({description: 'User logged in'})
     @ApiUnauthorizedResponse({description: 'Wrong password for user'})
@@ -22,6 +24,7 @@ export class AuthController {
         return this.authService.login(authDto);
     }
 
+    @Public()
     @ApiBadRequestResponse({description: 'Username already exists'})
     @ApiCreatedResponse({description: 'New user created'})
     @Post('signup')
@@ -29,16 +32,16 @@ export class AuthController {
         return this.authService.signUp(createUserDto);
     }
 
+    @Public()
     @UseGuards(RefreshJwtGuard)
     @ApiForbiddenResponse({description: 'Unauthorized'})
     @ApiUnauthorizedResponse({description: 'User not logged in'})
     @ApiCreatedResponse({description: 'Token refreshed'})
     @Post('refresh')
-    async refresh(@GetCurrentUserId() userId, @GetCurrentUserRefreshToken() token) { //@Req() req: Requesy -> logout(req.user['id'])
+    async refresh(@GetCurrentUserId() userId: string, @GetCurrentUserRefreshToken() token: string) { //@Req() req: Requesy -> logout(req.user['id'])
         return this.authService.refresh(userId, token);
     }
 
-    @UseGuards(JwtAuthGuard)
     @ApiUnauthorizedResponse({description: 'User not logged in'})
     @ApiCreatedResponse({description: 'User logged out'})
     @Post('logout')

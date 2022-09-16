@@ -11,7 +11,6 @@ export class UserController {
 
     @ApiParam({name: 'name', description: 'The name of the user'})
     @ApiUnauthorizedResponse({description: 'User not logged in'})
-    @UseGuards(JwtAuthGuard)
     @ApiOkResponse({type: User, description: 'User found'})
     @ApiNotFoundResponse({description: 'User not found'})
     @Get(':name')

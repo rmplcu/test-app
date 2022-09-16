@@ -18,7 +18,6 @@ export class MoviesController {
     }
 
     @ApiCreatedResponse({description: 'New movie created'})
-    @UseGuards(JwtAuthGuard)
     @ApiUnauthorizedResponse({description: 'User not logged in'})
     @ApiBody({type: MovieDto})
     @Post('new')

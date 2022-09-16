@@ -55,7 +55,7 @@ export class AuthService {
 
     async refresh(userId: string, rt: string) {
         const user = await this.userService.findById(userId);
-        if (!user) throw new ForbiddenException();
+        if (!user || !user.refresh_token) throw new ForbiddenException();
 
         //compare rt with hashed rt
         if (!await bcrypt.compare(rt, user.refresh_token)) throw new ForbiddenException();

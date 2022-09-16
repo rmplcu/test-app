@@ -4,9 +4,10 @@
  */
 
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger'
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,8 +17,13 @@ async function bootstrap() {
   //Validation global pipe
   app.useGlobalPipes(new ValidationPipe()); //guarda validation declaration per elenco di cosa validare nei dto 
 
+  //Global guards
+  const reflector = new Reflector()
+  app.useGlobalGuards(new JwtAuthGuard(reflector))
+
   //Swagger config
   const config = new DocumentBuilder()
+    .addCookieAuth()
     .addBearerAuth()
     .addSecurityRequirements('bearer')
     .setTitle('Nestjs test app')
