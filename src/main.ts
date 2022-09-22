@@ -8,6 +8,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger'
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,19 +18,22 @@ async function bootstrap() {
   //Validation global pipe
   app.useGlobalPipes(new ValidationPipe()); //guarda validation declaration per elenco di cosa validare nei dto 
 
+  //Cookies
+  app.use(cookieParser());
+
   //Global guards
-  const reflector = new Reflector()
-  app.useGlobalGuards(new JwtAuthGuard(reflector))
+  const reflector = new Reflector();
+  app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   //Swagger config
   const config = new DocumentBuilder()
-    .addCookieAuth()
+    .setLicense('GPL-V3', 'https://www.gnu.org/licenses/gpl-3.0.en.html')
     .addBearerAuth()
     .addSecurityRequirements('bearer')
-    .setTitle('Nestjs test app')
-    .setDescription('My first nestjs app')
-    .setVersion('1.0').build();
-  
+    .setTitle('Nestjs test API')
+    .setDescription('My first nestjs API')
+    .setVersion('1.0.0').build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/', app, document);
 

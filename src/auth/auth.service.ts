@@ -105,4 +105,9 @@ export class AuthService {
     hashData(param: string): Promise<string> {
         return bcrypt.hash(param, 10);
     }
+
+    async decrypt(token: string) {
+        const decrypted = this.jwtService.decode(token);
+        return decrypted;
+    }
 }

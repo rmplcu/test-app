@@ -7,9 +7,10 @@ import { UserModule } from '../user/user.module';
 import { AppController } from './app.controller';
 import { CitiesModule } from '../cities/cities.module';
 import { AuthModule } from '../auth/auth.module';
+import { QuizModule } from '../quiz/quiz.module';
 
 @Module({
-  imports: [AuthModule, CitiesModule, MoviesModule, UserModule, TypeOrmModule.forRoot({
+  imports: [AuthModule, CitiesModule, MoviesModule, UserModule, QuizModule, TypeOrmModule.forRoot({
     type: 'postgres',
     host: 'localhost',
     port: 5432,
